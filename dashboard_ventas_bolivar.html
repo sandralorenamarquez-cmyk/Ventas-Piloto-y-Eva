@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Ejecutivo de Ventas — Seguros Bolívar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+  :root {
+    --verde-primario: #1A6B3A;
+    --verde-medio: #2E8B57;
+    --verde-claro: #4CAF7D;
+    --verde-muy-claro: #E8F5EE;
+    --amarillo: #F5C518;
+    --amarillo-claro: #FFF9E6;
+    --rojo-alerta: #D93025;
+    --gris-fondo: #F4F5F7;
+    --gris-borde: #E2E6EA;
+    --gris-texto: #6B7280;
+    --blanco: #FFFFFF;
+    --negro: #111827;
+    --sombra: 0 2px 12px rgba(26,107,58,0.10);
+    --sombra-hover: 0 6px 24px rgba(26,107,58,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--gris-fondo);
+    color: var(--negro);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--verde-primario) 0%, #0F4D2A 100%);
+    padding: 22px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .logo-mark {
+    width: 46px; height: 46px;
+    background: var(--amarillo);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--verde-primario);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+
+  .header-titles h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+
+  .header-titles p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .period-badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+  }
+
+  .period-badge span {
+    color: var(--amarillo);
+    font-weight: 700;
+  }
+
+  .live-dot {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .live-dot::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--amarillo);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 32px 48px;
+  }
+
+  .section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--verde-primario);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gris-borde);
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi-card {
+    background: var(--blanco);
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--gris-borde);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-hover);
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+
+  .kpi-card.verde::before { background: var(--verde-primario); }
+  .kpi-card.amarillo::before { background: var(--amarillo); }
+  .kpi-card.alerta::before { background: var(--rojo-alerta); }
+  .kpi-card.azul::before { background: #2563EB; }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--gris-texto);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--negro);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .kpi-value.small { font-size: 22px; }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--gris-texto);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .kpi-icon {
+    position: absolute;
+    right: 20px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 38px;
+    opacity: 0.07;
+  }
+
+  .badge-semaforo {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-semaforo.verde { background: #E8F5EE; color: var(--verde-primario); }
+  .badge-semaforo.amarillo { background: var(--amarillo-claro); color: #92640A; }
+  .badge-semaforo.rojo { background: #FEE2E2; color: var(--rojo-alerta); }
+
+  /* ── CHARTS GRID ── */
+  .charts-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .charts-row.two-col { grid-template-columns: 1.6fr 1fr; }
+  .charts-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
+  .charts-row.half { grid-template-columns: 1fr 1fr; }
+
+  .chart-card {
+    background: var(--blanco);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--gris-borde);
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .chart-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--negro);
+  }
+
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--gris-texto);
+    margin-top: 3px;
+  }
+
+  .chart-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--verde-muy-claro);
+    color: var(--verde-primario);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .chart-tag.amarillo {
+    background: var(--amarillo-claro);
+    color: #92640A;
+  }
+
+  canvas { max-height: 240px; }
+
+  /* ── RANKING TABLE ── */
+  .ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ranking-table thead th {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gris-texto);
+    padding: 0 0 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+
+  .ranking-table tbody tr {
+    border-bottom: 1px solid rgba(226,230,234,0.6);
+    transition: background 0.15s;
+  }
+
+  .ranking-table tbody tr:hover { background: var(--gris-fondo); }
+  .ranking-table tbody tr:last-child { border-bottom: none; }
+
+  .ranking-table td {
+    padding: 12px 0;
+    font-size: 13px;
+  }
+
+  .rank-num {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--verde-primario);
+    width: 28px;
+    padding-right: 8px;
+  }
+
+  .rank-num.top1 { color: var(--amarillo); -webkit-text-stroke: 0.5px #92640A; }
+
+  .pos-name {
+    font-weight: 500;
+    color: var(--negro);
+    max-width: 200px;
+  }
+
+  .pos-name small {
+    display: block;
+    font-size: 10px;
+    color: var(--gris-texto);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  .bar-cell { width: 100px; padding: 0 12px; }
+
+  .mini-bar-bg {
+    height: 6px;
+    background: var(--gris-borde);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .mini-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--verde-primario), var(--verde-claro));
+    transition: width 1s ease;
+  }
+
+  .mini-bar-fill.amarillo {
+    background: linear-gradient(90deg, #D4A017, var(--amarillo));
+  }
+
+  .sales-val {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--verde-primario);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .pct-val {
+    font-size: 11px;
+    color: var(--gris-texto);
+    text-align: right;
+    padding-left: 10px;
+  }
+
+  /* ── PRODUCT BREAKDOWN ── */
+  .product-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+
+  .product-row:last-child { border-bottom: none; }
+
+  .product-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .product-info { flex: 1; }
+
+  .product-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--negro);
+    margin-bottom: 2px;
+  }
+
+  .product-plan {
+    font-size: 11px;
+    color: var(--gris-texto);
+  }
+
+  .product-sales {
+    text-align: right;
+  }
+
+  .product-sales .amount {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--negro);
+  }
+
+  .product-sales .pct {
+    font-size: 11px;
+    color: var(--gris-texto);
+  }
+
+  /* ── INSIGHT BOX ── */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .insight-card {
+    background: var(--blanco);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--gris-borde);
+    border-left: 4px solid var(--verde-primario);
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .insight-card.amarillo { border-left-color: var(--amarillo); }
+  .insight-card.rojo { border-left-color: var(--rojo-alerta); }
+
+  .insight-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .insight-body {}
+
+  .insight-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--negro);
+    margin-bottom: 4px;
+  }
+
+  .insight-text {
+    font-size: 12px;
+    color: var(--gris-texto);
+    line-height: 1.5;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--blanco);
+    border-top: 1px solid var(--gris-borde);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--gris-texto);
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--verde-primario);
+  }
+
+  /* ── SEMAPHORE ROW ── */
+  .semaphore-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .semaphore-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .semaphore-dot.verde { background: var(--verde-claro); }
+  .semaphore-dot.amarillo { background: var(--amarillo); }
+  .semaphore-dot.rojo { background: var(--rojo-alerta); }
+
+  .divider {
+    height: 1px;
+    background: var(--gris-borde);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="header-left">
+    <div class="logo-mark">SB</div>
+    <div class="header-titles">
+      <h1>Dashboard Ejecutivo de Ventas</h1>
+      <p>Tarjetas Seguros de Salud · Puntos de Venta Canal Droguerías</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="period-badge">Período: <span>23 Abr — 10 May 2026</span></div>
+    <div class="live-dot">Datos actualizados</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══ SECCIÓN 1: KPIs EJECUTIVOS ═══ -->
+  <div class="section-title">Resumen Ejecutivo</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card verde">
+      <div class="kpi-label">Ventas Totales</div>
+      <div class="kpi-value">$674.400</div>
+      <div class="kpi-sub">
+        <span class="badge-semaforo verde">▲ Activo</span>
+        <span>Período actual</span>
+      </div>
+      <div class="kpi-icon">💰</div>
+    </div>
+
+    <div class="kpi-card amarillo">
+      <div class="kpi-label">Transacciones</div>
+      <div class="kpi-value">14</div>
+      <div class="kpi-sub">
+        <span class="badge-semaforo amarillo">→ En curso</span>
+        <span>Ventas registradas</span>
+      </div>
+      <div class="kpi-icon">🧾</div>
+    </div>
+
+    <div class="kpi-card azul">
+      <div class="kpi-label">Ticket Promedio</div>
+      <div class="kpi-value small">$48.171</div>
+      <div class="kpi-sub">
+        <span>Por transacción</span>
+      </div>
+      <div class="kpi-icon">📊</div>
+    </div>
+
+    <div class="kpi-card alerta">
+      <div class="kpi-label">PdV Activos</div>
+      <div class="kpi-value">7<span style="font-size:16px;color:#9CA3AF"> / 8</span></div>
+      <div class="kpi-sub">
+        <span class="badge-semaforo rojo">⚠ 1 sin ventas</span>
+        <span>ECONOMAX</span>
+      </div>
+      <div class="kpi-icon">🏪</div>
+    </div>
+  </div>
+
+  <!-- ═══ SECCIÓN 2: VENTAS DIARIAS + PRODUCTOS ═══ -->
+  <div class="section-title">Tendencias de Venta</div>
+
+  <div class="charts-row two-col">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Evolución Diaria de Ventas</div>
+          <div class="chart-subtitle">Venta acumulada por día hábil · COP</div>
+        </div>
+        <div class="chart-tag">23 Abr – 10 May</div>
+      </div>
+      <canvas id="chartDiario"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Mix de Productos</div>
+          <div class="chart-subtitle">Participación por plan de seguro</div>
+        </div>
+        <div class="chart-tag amarillo">3 SKUs</div>
+      </div>
+      <canvas id="chartProductos"></canvas>
+      <div class="divider"></div>
+      <div class="product-row">
+        <div class="product-dot" style="background:#1A6B3A"></div>
+        <div class="product-info">
+          <div class="product-name">Plan S</div>
+          <div class="product-plan">7709904582904 · $41.500</div>
+        </div>
+        <div class="product-sales">
+          <div class="amount">$249.000</div>
+          <div class="pct">36.9%</div>
+        </div>
+      </div>
+      <div class="product-row">
+        <div class="product-dot" style="background:#F5C518"></div>
+        <div class="product-info">
+          <div class="product-name">Plan S Plus</div>
+          <div class="product-plan">7709904582997 · $64.800</div>
+        </div>
+        <div class="product-sales">
+          <div class="amount">$324.000</div>
+          <div class="pct">48.1%</div>
+        </div>
+      </div>
+      <div class="product-row">
+        <div class="product-dot" style="background:#2563EB"></div>
+        <div class="product-info">
+          <div class="product-name">Plan M</div>
+          <div class="product-plan">7709904582942 · $101.400</div>
+        </div>
+        <div class="product-sales">
+          <div class="amount">$101.400</div>
+          <div class="pct">15.0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECCIÓN 3: RANKING PdV ═══ -->
+  <div class="section-title">Análisis por Punto de Venta</div>
+
+  <div class="charts-row half">
+    <!-- RANKING VENTAS -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Ranking de Puntos de Venta</div>
+          <div class="chart-subtitle">Por ventas totales acumuladas</div>
+        </div>
+        <div class="chart-tag">8 PdV</div>
+      </div>
+      <table class="ranking-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Punto de Venta</th>
+            <th class="bar-cell"></th>
+            <th style="text-align:right">Ventas</th>
+            <th style="text-align:right;padding-left:10px">Part.</th>
+          </tr>
+        </thead>
+        <tbody id="rankingBody"></tbody>
+      </table>
+    </div>
+
+    <!-- BARRAS PdV -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Participación por Punto de Venta</div>
+          <div class="chart-subtitle">% sobre ventas totales</div>
+        </div>
+        <div class="chart-tag">Período completo</div>
+      </div>
+      <canvas id="chartPdV"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══ SECCIÓN 4: ACUMULADO + SEMANA ═══ -->
+  <div class="section-title">Evolución Semanal y Acumulado</div>
+
+  <div class="charts-row half">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Ventas Acumuladas</div>
+          <div class="chart-subtitle">Curva de acumulación · COP</div>
+        </div>
+        <div class="chart-tag">Tendencia</div>
+      </div>
+      <canvas id="chartAcumulado"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Ventas por Semana</div>
+          <div class="chart-subtitle">Comparativo semanal</div>
+        </div>
+        <div class="chart-tag amarillo">3 semanas</div>
+      </div>
+      <canvas id="chartSemanal"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══ SECCIÓN 5: INSIGHTS ═══ -->
+  <div class="section-title">Insights &amp; Alertas Comerciales</div>
+
+  <div class="insights-grid">
+    <div class="insight-card verde">
+      <div class="insight-icon">🏆</div>
+      <div class="insight-body">
+        <div class="insight-title">Líder de Ventas: HIPERFARMA RINCON</div>
+        <div class="insight-text">Concentra el <strong>28.8%</strong> de las ventas totales ($194.400). Único punto con ventas del Plan S Plus en dos días distintos (Abr 23 y 24). Mayor consistencia del canal.</div>
+      </div>
+    </div>
+
+    <div class="insight-card amarillo">
+      <div class="insight-icon">⭐</div>
+      <div class="insight-body">
+        <div class="insight-title">Plan S Plus domina el mix</div>
+        <div class="insight-text">El Plan S Plus representa el <strong>48.1%</strong> de la facturación total a pesar de contar con el mismo volumen de unidades que Plan S. Precio premium ($64.800) impulsa el ticket.</div>
+      </div>
+    </div>
+
+    <div class="insight-card rojo">
+      <div class="insight-icon">⚠️</div>
+      <div class="insight-body">
+        <div class="insight-title">Alerta: ECONOMAX sin ventas</div>
+        <div class="insight-text">DROGUERIA Y MISCELANEA ECONOMAX (Cód. 237864) no registra <strong>ninguna venta</strong> en todo el período. Requiere visita comercial o verificación operativa urgente.</div>
+      </div>
+    </div>
+
+    <div class="insight-card verde">
+      <div class="insight-icon">📅</div>
+      <div class="insight-body">
+        <div class="insight-title">1 de Mayo: Mejor día de ventas</div>
+        <div class="insight-text">El 1° de mayo registró $147.800, el pico más alto del período. Impulsado por EVA ($83.000 + $64.800 en dos planes). Oportunidad de replicar en festivos.</div>
+      </div>
+    </div>
+
+    <div class="insight-card amarillo">
+      <div class="insight-icon">📉</div>
+      <div class="insight-body">
+        <div class="insight-title">Desaceleración desde 5 de mayo</div>
+        <div class="insight-text">Solo $41.500 el 5 de mayo y cero ventas en los días siguientes. El período mayo 6–10 está <strong>pendiente de cierre</strong>. Monitorear si hay data tardía o caída real.</div>
+      </div>
+    </div>
+
+    <div class="insight-card verde">
+      <div class="insight-icon">💡</div>
+      <div class="insight-body">
+        <div class="insight-title">Plan M: oportunidad sin explotar</div>
+        <div class="insight-text">Solo 1 PdV vendió Plan M (FARM JYM, $101.400). El plan de mayor precio unitario tiene la menor penetración (1 unidad). Potencial alto si se activa en más puntos.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-brand">
+    <div style="width:20px;height:20px;background:var(--verde-primario);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--amarillo)">SB</div>
+    Seguros Bolívar — Dashboard Comercial
+  </div>
+  <div>Fuente: Hoja "Venta" · Inventario_Tarjetas.xlsx · Período 23 Abr – 10 May 2026</div>
+  <div>⚠ Solo datos de la pestaña "Venta" · Inventario excluido</div>
+</footer>
+
+<script>
+// ── DATA ──
+const labels = ['23 Abr','24 Abr','27 Abr','28 Abr','29 Abr','30 Abr','1 May','5 May','6 May','7 May','8 May','9 May','10 May'];
+const dailySales = [106300, 129600, 101400, 41500, 41500, 64800, 147800, 41500, 0, 0, 0, 0, 0];
+
+const posData = [
+  { name: 'HIPERFARMA RINCON',   code: '242165', sales: 194400 },
+  { name: 'EVA',                  code: 'S/C',    sales: 147800 },
+  { name: 'FARM JYM',             code: '239546', sales: 101400 },
+  { name: 'LOS CEREZOS CYC',      code: '242678', sales: 83000  },
+  { name: 'MARANATHAI',           code: 'S/C',    sales: 64800  },
+  { name: 'CONEXRED SAS',         code: 'S/C',    sales: 41500  },
+  { name: 'DROGUERIA GAMA',       code: '239535', sales: 41500  },
+  { name: 'ECONOMAX',             code: '237864', sales: 0      },
+];
+
+const total = 674400;
+const verde    = '#1A6B3A';
+const verdeClaro = '#4CAF7D';
+const amarillo = '#F5C518';
+const azul     = '#2563EB';
+const rojo     = '#D93025';
+const gris     = '#E2E6EA';
+const grisTxt  = '#6B7280';
+
+const defaultFont = { family: "'Source Sans 3', sans-serif", size: 12 };
+Chart.defaults.font = defaultFont;
+Chart.defaults.color = grisTxt;
+
+// ── CHART 1: DIARIO ──
+const ctxDiario = document.getElementById('chartDiario').getContext('2d');
+new Chart(ctxDiario, {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Ventas COP',
+      data: dailySales,
+      backgroundColor: dailySales.map(v => v === Math.max(...dailySales) ? amarillo : v === 0 ? gris : verde + 'CC'),
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ' $' + ctx.parsed.y.toLocaleString('es-CO')
+        }
+      }
+    },
+    scales: {
+      y: {
+        grid: { color: gris },
+        ticks: {
+          callback: v => '$' + (v/1000).toFixed(0) + 'K'
+        }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── CHART 2: PRODUCTOS DONUT ──
+const ctxProd = document.getElementById('chartProductos').getContext('2d');
+new Chart(ctxProd, {
+  type: 'doughnut',
+  data: {
+    labels: ['Plan S', 'Plan S Plus', 'Plan M'],
+    datasets: [{
+      data: [249000, 324000, 101400],
+      backgroundColor: [verde, amarillo, azul],
+      borderWidth: 3,
+      borderColor: '#fff',
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '68%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ' $' + ctx.parsed.toLocaleString('es-CO') + ' (' + ((ctx.parsed/total)*100).toFixed(1) + '%)'
+        }
+      }
+    }
+  }
+});
+
+// ── RANKING TABLE ──
+const rankingBody = document.getElementById('rankingBody');
+posData.forEach((p, i) => {
+  const pct = total > 0 ? ((p.sales / total) * 100).toFixed(1) : '0.0';
+  const barW = total > 0 ? Math.round((p.sales / posData[0].sales) * 100) : 0;
+  const isTop = i === 0;
+  const isZero = p.sales === 0;
+
+  rankingBody.innerHTML += `
+    <tr>
+      <td class="rank-num ${isTop ? 'top1' : ''}">${i + 1}</td>
+      <td class="pos-name">
+        ${p.name}
+        <small>Cód. ${p.code}</small>
+      </td>
+      <td class="bar-cell">
+        <div class="mini-bar-bg">
+          <div class="mini-bar-fill ${isTop ? 'amarillo' : ''}" style="width:${barW}%"></div>
+        </div>
+      </td>
+      <td class="sales-val" style="color:${isZero ? rojo : verde}">${isZero ? '—' : '$' + p.sales.toLocaleString('es-CO')}</td>
+      <td class="pct-val">${pct}%</td>
+    </tr>`;
+});
+
+// ── CHART 3: BARRAS PdV ──
+const ctxPdV = document.getElementById('chartPdV').getContext('2d');
+new Chart(ctxPdV, {
+  type: 'bar',
+  data: {
+    labels: posData.map(p => p.name),
+    datasets: [{
+      label: 'Ventas COP',
+      data: posData.map(p => p.sales),
+      backgroundColor: posData.map((p, i) => i === 0 ? amarillo : p.sales === 0 ? rojo + '55' : verde + 'CC'),
+      borderRadius: 5,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: { label: ctx => ' $' + ctx.parsed.x.toLocaleString('es-CO') }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: gris },
+        ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K' }
+      },
+      y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ── CHART 4: ACUMULADO ──
+const acumulado = dailySales.reduce((acc, v, i) => {
+  acc.push((acc[i - 1] || 0) + v);
+  return acc;
+}, []);
+
+const ctxAcum = document.getElementById('chartAcumulado').getContext('2d');
+new Chart(ctxAcum, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Acumulado COP',
+      data: acumulado,
+      borderColor: verde,
+      backgroundColor: verde + '1A',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 4,
+      pointBackgroundColor: verde,
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ' $' + ctx.parsed.y.toLocaleString('es-CO') } }
+    },
+    scales: {
+      y: {
+        grid: { color: gris },
+        ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── CHART 5: SEMANAL ──
+const semanas = ['Sem 1 (23-24 Abr)', 'Sem 2 (27 Abr - 1 May)', 'Sem 3 (5-10 May)'];
+const ventasSem = [235900, 397000, 41500];
+
+const ctxSem = document.getElementById('chartSemanal').getContext('2d');
+new Chart(ctxSem, {
+  type: 'bar',
+  data: {
+    labels: semanas,
+    datasets: [{
+      label: 'Ventas semanales',
+      data: ventasSem,
+      backgroundColor: [verde + 'BB', amarillo, rojo + '88'],
+      borderRadius: 8,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ' $' + ctx.parsed.y.toLocaleString('es-CO') } }
+    },
+    scales: {
+      y: {
+        grid: { color: gris },
+        ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'K' }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
